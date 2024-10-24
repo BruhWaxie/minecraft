@@ -21,6 +21,8 @@ class Tree(Button):
                          **kwargs)
 
 class Block(Button):
+    current_block = DEFAULT_BLOCK
+
     def __init__(self, pos, texture_id=1, **kwargs):
         super().__init__(model='cube', 
                          color = color.color(0, 0, random.uniform(0.9, 1)),
@@ -44,11 +46,41 @@ class Map(Entity):
             cube = Block((x,0,0), 2)
             for z in range(MAP_SIZE):
                 y = floor(self.noise([x/24, z/24])*6)
-                cube = Block((x,y,z), 1)
+                cube = Block((x,y,z), DEFAULT_BLOCK)
 
                 rand_num = random.randint(1, TREE_DENSITY)
                 if rand_num == 32:
                     tree = Tree((x,y+1,z))
+
+
+class Player(FirstPersonController):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.held_block = Entity(model ='cube', texture=block_textures[Block.current_block], parent=camera.ui, position=(0.6, -0.4),
+                                 rotation = Vec3(30, -30, 10),
+                                 shader = basic_lighting_shader,
+                                 scale=0.2
+                                 )
+    def input(self, key):
+        super().input(key)
+        if key == 'left mouse down' and mouse.hovered_entity:
+            destroy(mouse.hovered_entity)
+        if key == 'right mouse down' and mouse.hovered_entity:
+            hit_info = raycast(camera.world_position, camera.forward, distance=10)
+            if hit_info.hit and isinstance(hit_info.entity,Block):
+                Block(hit_info.entity.position + hit_info.normal, Block.current_block)
+        
+        if key == 'scroll up':
+            Block.current_block += 1
+            if Block.current_block >= len(block_textures):
+                Block.current_block = 0
+            self.held_block.texture = block_textures[Block.current_block]
+        if key == 'scroll down':
+            Block.current_block -= 1
+            if Block.current_block < 0:
+                Block.current_block = len(block_textures) - 1
+            self.held_block.texture = block_textures[Block.current_block]
+
 
     
         

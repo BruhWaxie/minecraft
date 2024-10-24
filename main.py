@@ -6,7 +6,7 @@ from perlin_noise import PerlinNoise
 app = Ursina()
 
 from settings import *
-from models import Block, Map
+from models import *
 
 sky = Sky(texture='sky_sunset')
 sun = DirectionalLight(shadows=True)
@@ -19,6 +19,6 @@ ground = Entity(model='plane', collider='box', scale=64, texture='grass', textur
 ground.y = -5
 
 
-player = FirstPersonController() 
+player = Player() 
 window.fullscreen = True
 app.run()
